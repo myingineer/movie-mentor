@@ -28,6 +28,18 @@ const castErrorHandler = (error) => {
     return new AppError(msg, 400);
 };
 
+const duplicateErrorHandler = (error) => {
+    const msg = `Movie with ${error.keyValue.name} already exists`;
+    return new AppError(msg, 400);
+};
+
+const validationErrorHandler = (error) => {
+    const errors = Object.values(error.errors).map(val => val.message);
+    const errorMessages = errors.join('. ');
+    const msg = `Invalid Input Data: ${errorMessages}`;
+    return new AppError(msg, 400);
+};
+
 module.exports = (error, req, res, next) => {
     error.statusCode = error.statusCode || 500;
     error.status = error.status || 'error';
@@ -36,6 +48,12 @@ module.exports = (error, req, res, next) => {
     } else if (process.env.NODE_ENV === 'production') {
         if (error.name === 'CastError') {
             error = castErrorHandler(error);
+        };
+        if (error.code === 11000) {
+            error = duplicateErrorHandler(error);
+        };
+        if (error.name === 'ValidationError') {
+            error = validationErrorHandler(error);
         };
         productionErrors(res, error);
     };

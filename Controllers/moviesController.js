@@ -43,51 +43,49 @@ exports.getAMovie = asyncErrorHandler (async (req, res, next) => {
 
 });
 
-exports.createAMovie = async (req, res) => {
-    try {
-        const movie = await Movie.create(req.body);
-        res.status(201).json({
-            status: 'Success',
-            data: {
-                movie
-            }
-        });
-    } catch (error) {
-        res.status(400).json({
-            status: 'Failed',
-            message: error.message
-        });
-    };
-};
+exports.createAMovie = asyncErrorHandler (async (req, res, next) => {
 
-exports.updateAMovie = async (req, res) => {
-    try {
-        const movieToUpdate = await Movie.findByIdAndUpdate(req.params.id, req.body, {new: true, runValidators: true});
-        res.status(200).json({
-            status: "success",
-            data: {
-                movie: movieToUpdate
-            }
-        });        
-    } catch (error) {
-        res.status(400).json({
-            status: 'Failed',
-            message: error.message
-        });
-    };
-};
+    const movie = await Movie.create(req.body);
+    res.status(201).json({
+        status: 'Success',
+        data: {
+            movie
+        }
+    });
 
-exports.deleteAMovie = async (req, res) => {
-    try {
-        await Movie.findByIdAndDelete(req.params.id);
-        res.status(204).json({
-            status: "success",
-            data: null
-        });
-    } catch (error) {
-        res.status(400).json({
-            status: 'Failed',
-            message: error.message
-        });
+});
+
+exports.updateAMovie = asyncErrorHandler (async (req, res, next) => {
+
+    const movieToUpdate = await Movie.findByIdAndUpdate(req.params.id, req.body, {new: true, runValidators: true});
+
+    if(!movieToUpdate) {
+        const error = new AppError(`Movie with ID ${req.params.id} not found`, 404);
+        return next(error);
     };
-};
+
+    res.status(200).json({
+        status: "success",
+        data: {
+            movie: movieToUpdate
+        }
+    });        
+
+});
+
+exports.deleteAMovie = asyncErrorHandler (async (req, res, next) => {
+
+    const deletedMovie = await Movie.findByIdAndDelete(req.params.id);
+    
+    if (!deletedMovie) {
+        const error = new AppError(`Could not find movie with ID ${req.params.id} to delete`, 404);
+        return next(error);
+    };
+
+    res.status(204).json({
+        status: "success",
+        data: null
+    });
+
+
+});
