@@ -6,6 +6,12 @@ const AppError = require('./Utils/appError');
 const app = express();
 
 app.use(express.json());
+app.get('/', (req, res) => {
+    res.status(200).json({
+        status: 'Success',
+        message: "Welcome to myingineer's movie-mentor API. Read the documentation for usage"
+    });
+});
 app.use('/api/v1/movies', moviesRoute);
 app.use('/api/v1/movies', userRoute);
 app.all('*', (req, res, next) => {
