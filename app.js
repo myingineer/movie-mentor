@@ -3,9 +3,11 @@ const moviesRoute = require('./Routers/moviesRoute');
 const userRoute = require('./Routers/usersRoute');
 const globalErrorHandler = require('./Controllers/globalErrorController');
 const AppError = require('./Utils/appError');
+const cors = require('cors');
 const app = express();
 
 app.use(express.json());
+app.use(cors());
 app.enable('trust proxy');
 app.get('/', (req, res) => {
     res.status(200).json({

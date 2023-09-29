@@ -13,7 +13,7 @@ exports.createUser = asyncErrorHandler (async (req, res, next) => {
     res.status(201).json({
         status: 'Success',
         data: {
-            newUser: newUser.select('-role')
+            newUser: newUser
         }
     });
 });
@@ -24,7 +24,7 @@ exports.loginUser = asyncErrorHandler (async (req, res, next) => {
     const password = req.body.password;
 
     if (!username || !password) {
-        const error = new AppError(`Please Provide an Email/Password`, 400);
+        const error = new AppError(`Please Provide a Username/Password`, 400);
         return next(error);
     };
 
