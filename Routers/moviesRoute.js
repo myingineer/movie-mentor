@@ -1,18 +1,19 @@
 const express = require('express');
 const moviesController = require('../Controllers/moviesController');
+const userController = require('../Controllers/userController');
 
 const router = express.Router();
 
 router.route('/highest-rated')
-    .get(moviesController.getHighestRated, moviesController.getAllMovies);
+    .get(userController.protect, moviesController.getHighestRated, moviesController.getAllMovies);
     
 
 router.route('/')
-    .get(moviesController.getAllMovies)
+    .get(userController.protect, moviesController.getAllMovies)
     .post(moviesController.createAMovie);
 
 router.route('/:id')
-    .get(moviesController.getAMovie)
+    .get(userController.protect, moviesController.getAMovie)
     .patch(moviesController.updateAMovie)
     .delete(moviesController.deleteAMovie);
 

@@ -37,6 +37,18 @@ const userSchema = new mongoose.Schema({
         enum: ['user', 'admin'],
         default: 'user',
         select: false
+    },
+    passwordChangedAt: {
+        type: Date,
+        select: false
+    },
+    passwordResetToken: {
+        type: String,
+        select: false
+    },
+    passwordResetTokenExpire: {
+        type: Date,
+        select: false
     }
 });
 
@@ -53,6 +65,15 @@ userSchema.pre('save', async function(next) {
 
 userSchema.methods.comparePasswords = async function(password, dbpassword) {
     return await bcrypt.compare(password, dbpassword);
+};
+
+userSchema.methods.isPasswordChanged = async function(JWTTimeStamp) {
+    if (this.passwordChangedAt) {
+        // Converting the passwordChangedAt date to a timestamp in seconds and base 10
+        const pswdChangedTimeStamp = parseInt(this.passwordChangedAt.getTime() / 1000, 10);
+        return JWTTimeStamp < pswdChangedTimeStamp;// If the password was changed after JWT was issued, we want to return true
+    };
+    return false; // Password wasn't changed
 };
 
 const User = mongoose.model('User', userSchema);
