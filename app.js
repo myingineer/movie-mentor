@@ -12,7 +12,9 @@ app.enable('trust proxy');
 app.get('/', (req, res) => {
     res.status(200).json({
         status: 'Success',
-        message: "Welcome to myingineer's movie-mentor API. Read the documentation for usage"
+        message: "Welcome to myingineer's movie-mentor API. Read the documentation for usage",
+        githubRepo: "https://github.com/myingineer/movie-mentor.git",
+        docs: "You can find the documentation in the README file of the repo"
     });
 });
 app.use('/api/v1/movies', moviesRoute);

@@ -28,7 +28,7 @@ class ApiFeatures {
 
     pagination() {
         const page = +this.queryString.page || 1;
-        const limit = +this.queryString.limit || 5;
+        const limit = +this.queryString.limit || 25;
         const skip = (page - 1) * limit; // For each page, how many movies should be skipped before that page
       
         this.queryObject = this.queryObject.skip(skip).limit(limit);
