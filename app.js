@@ -13,7 +13,7 @@ app.get('/', (req, res) => {
     });
 });
 app.use('/api/v1/movies', moviesRoute);
-app.use('/api/v1/movies', userRoute);
+app.use('/api/v1/users', userRoute);
 app.all('*', (req, res, next) => {
     const error = new AppError(`Page ${req.url} not found`);
     next(error);
