@@ -43,6 +43,23 @@ exports.getAMovie = asyncErrorHandler (async (req, res, next) => {
 
 });
 
+exports.searchForMovie = asyncErrorHandler (async (req, res, next) => {
+    const name = req.params.name;
+    const regex = new RegExp(name, 'i');
+    const movies = await Movie.find({name: regex});
+
+    if (!movies) {
+        const error = new AppError(`Movie with name (${regex}) not found`, 404);
+        return next(error);
+    };
+
+    res.status(200).json({
+        status: 'Success',
+        lengthOfMovies: movies.length,
+        movies
+    });
+});
+
 exports.createAMovie = asyncErrorHandler (async (req, res, next) => {
 
     const movie = await Movie.create(req.body);

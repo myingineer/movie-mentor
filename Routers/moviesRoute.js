@@ -17,5 +17,7 @@ router.route('/:id')
     .patch(userController.protect, userController.adminOnly('admin'), moviesController.updateAMovie)
     .delete(userController.protect, userController.adminOnly('admin'), moviesController.deleteAMovie);
 
+router.route('/search/:name')
+    .get(userController.protect, moviesController.searchForMovie)
 
 module.exports = router;

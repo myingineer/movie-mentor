@@ -48,6 +48,11 @@ const validationErrorHandler = (error) => {
     return new AppError(msg, 400);
 };
 
+const expiredTokenHandler = (error) => {
+    const msg = `Your login session has expired. Please login again`;
+    return new AppError(msg, 419);
+};
+
 module.exports = (error, req, res, next) => {
     error.statusCode = error.statusCode || 500;
     error.status = error.status || 'error';
@@ -62,6 +67,9 @@ module.exports = (error, req, res, next) => {
         };
         if (error.name === 'ValidationError') {
             error = validationErrorHandler(error);
+        };
+        if (error.name === 'TokenExpiredError') {
+            error = expiredTokenHandler(error);
         };
         productionErrors(res, error);
     };
