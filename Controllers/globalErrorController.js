@@ -29,8 +29,16 @@ const castErrorHandler = (error) => {
 };
 
 const duplicateErrorHandler = (error) => {
-    const msg = `Movie with ${error.keyValue.name} already exists`;
-    return new AppError(msg, 400);
+    // const msg = `Movie with ${error.keyValue.name} already exists`;
+    // const msg = `Duplicate Key: ${error.keyValue}`;
+    const duplicateKeyField = Object.keys(error.keyPattern)[0]
+    if (duplicateKeyField === 'emailAddress') {
+        const msg = `Email with ${error.keyValue.emailAddress} already exists`;
+        return new AppError(msg, 400);
+    } else if (duplicateKeyField === 'username') {
+        const msg = `A User with Username (${error.keyValue.username}) already exists`;
+        return new AppError(msg, 400);
+    }
 };
 
 const validationErrorHandler = (error) => {
