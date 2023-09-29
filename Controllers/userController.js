@@ -140,31 +140,13 @@ exports.resetPassword = asyncErrorHandler (async (req, res, next) => {
         return next(error);
     };
 
-    const password = req.body.password;
-    const confirmPassword = req.body.confirmPassword;
-
-    if (!password || !confirmPassword) {
-        const error = new AppError(`Please provide a Password and Confirm it`, 400);
-        return next(error);
-    };
-
-    if (password.length < 8) {
-        const error = new AppError(`Password provided is less than the minimum length (8)`, 400);
-        return next(error);
-    };
-
-    if (password !== confirmPassword) {
-        const error = new AppError(`Password and Confirm Password do not match. Please check the passwords and Try Again`, 400);
-        return next(error);
-    };
-
-    user.password = password;
-    user.confirmPassword = confirmPassword;
+    user.password = req.body.password;
+    user.confirmPassword = req.body.confirmPassword;
     user.passwordResetToken = undefined;
     user.passwordResetTokenExpire = undefined;
     user.passwordChangedAt = Date.now();
 
-    user.save();
+    await user.save({validateBeforeSave: true});
 
     res.status(200).json({
         status: 'Success',
