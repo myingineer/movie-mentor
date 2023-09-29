@@ -119,7 +119,7 @@ exports.forgotPassword = asyncErrorHandler (async (req, res, next) => {
 
         res.status(200).json({
             status: 'Success',
-            message: `Password Reset Link Sent To ${user.emailAddress}. Please check your mail\n If you didn't see the mail, check your SPAM folder`
+            message: `Password Reset Link Sent To ${user.emailAddress}. Please check your mail. If you didn't see the mail, check your SPAM folder`
         });
     } catch (error) {
         user.passwordResetToken = undefined;
@@ -140,8 +140,16 @@ exports.resetPassword = asyncErrorHandler (async (req, res, next) => {
         return next(error);
     };
 
-    user.password = req.body.password;
-    user.confirmPassword = req.body.confirmPassword;
+    const password = req.body.password;
+    const confirmPassword = req.body.confirmPassword;
+
+    if (!password || !confirmPassword) {
+        const error = new AppError(`Password and Confirm Password do not match. Please check the passwords and Try Again`, 400);
+        return next(error);
+    };
+
+    user.password = password;
+    user.confirmPassword = confirmPassword;
     user.passwordResetToken = undefined;
     user.passwordResetTokenExpire = undefined;
     user.passwordChangedAt = Date.now();
