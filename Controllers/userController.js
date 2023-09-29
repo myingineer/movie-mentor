@@ -3,6 +3,8 @@ const asyncErrorHandler = require('../Utils/asyncErrorHandler');
 const jwt = require('jsonwebtoken');
 const AppError = require('../Utils/appError');
 const util = require('util');
+const passwordResetEmail = require('../Utils/passwordResetEmail');
+const crypto = require('crypto');
 
 
 exports.createUser = asyncErrorHandler (async (req, res, next) => {
@@ -87,3 +89,67 @@ exports.adminOnly = (role) => {
         next();
     };
 };
+
+exports.forgotPassword = asyncErrorHandler (async (req, res, next) => {
+    const user = await User.findOne({emailAddress: req.body.emailAddress});
+
+    if (!user) {
+        const error = new AppError(`User with Email ${req.body.emailAddress} not found`, 404);
+        return next(error);
+    };
+
+    const passwordResetToken = await user.createResetPasswordToken();
+
+    await user.save({validateBeforeSave: false});
+
+    const resetUrl = `${req.protocol}://${req.get('host')}/api/v1/users/resetPassword/${passwordResetToken}`;
+    const message = `
+        We received a request to reset your password.\n\n
+        Please use the link to reset your password: \n\n
+        ${resetUrl}\n\n
+        This link would be valid for 10 minutes.\n\n
+        If you did not request to reset you password, kindly ignore this Mail and Contact Support\n\n
+    `
+    try {
+        await passwordResetEmail({
+            email: user.emailAddress,
+            subject: 'Password Request Link',
+            message
+        });
+
+        res.status(200).json({
+            status: 'Success',
+            message: `Password Reset Link Sent To ${user.emailAddress}. Please check your mail\n If you didn't see the mail, check your SPAM folder`
+        });
+    } catch (error) {
+        user.passwordResetToken = undefined;
+        user.passwordResetTokenExpire = undefined;
+        user.save({validateBeforeSave: false});
+        return next(new AppError('There was an error sending password reset mail', 500));
+    };
+});
+
+exports.resetPassword = asyncErrorHandler (async (req, res, next) => {
+    // We want to encrypt the password reset token back
+    const token = crypto.createHash('sha256').update(req.params.token).digest('hex');
+    // After finding that user with the reset token, we also want to check if the token is expired or not
+    const user = await User.findOne({passwordResetToken: token, passwordResetTokenExpire: {$gt: Date.now()}});
+    // If user does not exist
+    if (!user) {
+        const error = new AppError('Token Is Invalid/Expired', 400);
+        return next(error);
+    };
+
+    user.password = req.body.password;
+    user.confirmPassword = req.body.confirmPassword;
+    user.passwordResetToken = undefined;
+    user.passwordResetTokenExpire = undefined;
+    user.passwordChangedAt = Date.now();
+
+    user.save();
+
+    res.status(200).json({
+        status: 'Success',
+        message: 'Password Changed Successfully'
+    });
+});
