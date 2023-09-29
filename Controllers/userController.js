@@ -144,6 +144,16 @@ exports.resetPassword = asyncErrorHandler (async (req, res, next) => {
     const confirmPassword = req.body.confirmPassword;
 
     if (!password || !confirmPassword) {
+        const error = new AppError(`Please provide a Password and Confirm it`, 400);
+        return next(error);
+    };
+
+    if (password.length < 8) {
+        const error = new AppError(`Password provided is less than the minimum length (8)`, 400);
+        return next(error);
+    };
+
+    if (password !== confirmPassword) {
         const error = new AppError(`Password and Confirm Password do not match. Please check the passwords and Try Again`, 400);
         return next(error);
     };
