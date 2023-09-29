@@ -10,12 +10,12 @@ router.route('/highest-rated')
 
 router.route('/')
     .get(userController.protect, moviesController.getAllMovies)
-    .post(moviesController.createAMovie);
+    .post(userController.protect, userController.adminOnly('admin'), moviesController.createAMovie);
 
 router.route('/:id')
     .get(userController.protect, moviesController.getAMovie)
-    .patch(moviesController.updateAMovie)
-    .delete(moviesController.deleteAMovie);
+    .patch(userController.protect, userController.adminOnly('admin'), moviesController.updateAMovie)
+    .delete(userController.protect, userController.adminOnly('admin'), moviesController.deleteAMovie);
 
 
 module.exports = router;

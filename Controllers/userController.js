@@ -11,7 +11,7 @@ exports.createUser = asyncErrorHandler (async (req, res, next) => {
     res.status(201).json({
         status: 'Success',
         data: {
-            newUser
+            newUser: newUser.select('-role')
         }
     });
 });
@@ -61,7 +61,7 @@ exports.protect = asyncErrorHandler (async (req, res, next) => {
     };
 
     const tokenToValidate = await util.promisify(jwt.verify)(token, process.env.SECRET_KEY);
-    const user = await User.findById(tokenToValidate.id);
+    const user = await User.findById(tokenToValidate.id).select('+role');
 
     if (!user) {
         const error = new AppError(`User does not Exist. Please Sign Up`, 404);
@@ -77,3 +77,13 @@ exports.protect = asyncErrorHandler (async (req, res, next) => {
     req.user = user; // Making the user requesting that route to be the user at that time
     next();
 });
+
+exports.adminOnly = (role) => {
+    return (req, res, next) => {
+        if(req.user.role !== role) {
+            const error =  new AppError('You do not have permission to perform this action', 403);
+            next(error);
+        };
+        next();
+    };
+};
