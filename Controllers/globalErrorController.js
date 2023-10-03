@@ -53,11 +53,6 @@ const expiredTokenHandler = (error) => {
     return new AppError(msg, 419);
 };
 
-const duplicateMovieNameHandler = (error) => {
-    const msg = `Movie with ${error.keyValue.name} already exists`;
-    return new AppError(msg, 400);
-};
-
 module.exports = (error, req, res, next) => {
     error.statusCode = error.statusCode || 500;
     error.status = error.status || 'error';
@@ -75,9 +70,6 @@ module.exports = (error, req, res, next) => {
         };
         if (error.name === 'TokenExpiredError') {
             error = expiredTokenHandler(error);
-        };
-        if (error.Object.keys(error.keyPattern)[0] === 'name') {
-            error = duplicateMovieNameHandler(error);
         };
         productionErrors(res, error);
     };
